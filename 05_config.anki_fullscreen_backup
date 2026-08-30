@@ -1,0 +1,142 @@
+# ==============================================================================
+# 1. SYSTEM INITIALIZATION & ENVIRONMENT
+# ==============================================================================
+# Sync desktop variables with systemd/D-Bus to ensure smooth application boot
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+
+# ==============================================================================
+# 2. CORE VISUAL STYLES & INTERFACE
+# ==============================================================================
+set $mod Mod4
+font pango:DejaVu Sans Mono 10
+floating_modifier $mod normal
+default_border pixel 2
+default_floating_border normal 2
+hide_edge_borders none
+output * bg #1a1a1a solid_color
+
+# ==============================================================================
+# 3. CORE KEYBINDINGS & CORE UTILITIES
+# ==============================================================================
+bindsym $mod+Return exec kitty
+bindsym $mod+Shift+Return exec kitty --app-id kitty-local
+bindsym $mod+f exec firefox
+bindsym $mod+Shift+q kill
+bindsym $mod+Shift+c reload
+
+# Screenshot tool (Print Screen -> copies region to clipboard)
+bindsym Print exec grim -g "$(slurp)" - | wl-copy --type image/png
+
+# Manual application launchers
+bindsym $mod+Shift+a exec flatpak run net.ankiweb.Anki
+bindsym $mod+e exec _JAVA_AWT_WM_NONREPARENTING=1 eclipse
+
+# ==============================================================================
+# 4. WORKSPACE NAVIGATION & ROUTING KEYS
+# ==============================================================================
+# Jump to workspaces 1-6
+bindsym $mod+1 workspace 1
+bindsym $mod+2 workspace 2
+bindsym $mod+3 workspace 3
+bindsym $mod+4 workspace 4
+bindsym $mod+5 workspace 5
+bindsym $mod+6 workspace 6
+
+# Move containers to workspaces 1-6
+bindsym $mod+Shift+1 move container to workspace 1
+bindsym $mod+Shift+2 move container to workspace 2
+bindsym $mod+Shift+3 move container to workspace 3
+bindsym $mod+Shift+4 move container to workspace 4
+bindsym $mod+Shift+5 move container to workspace 5
+bindsym $mod+Shift+6 move container to workspace 6
+
+# Tab/Bracket window focus navigation adjustments
+bindsym $mod+bracketright focus right
+bindsym $mod+bracketleft focus left
+bindsym $mod+Tab focus right or surface
+bindsym $mod+Shift+Tab focus left or surface
+
+# ==============================================================================
+# 5. PERMANENT WINDOW-TO-WORKSPACE ROUTING
+# ==============================================================================
+assign [app_id="kitty"] workspace 1
+assign [app_id="yazi"] workspace 2
+assign [app_id="firefox"] workspace 3
+assign [app_id="anki"] workspace 4
+assign [class="(?i)anki"] workspace 4
+assign [app_id="net.ankiweb.Anki"] workspace 4
+assign [app_id="(?i)zathura"] workspace 5
+assign [class="Eclipse"] workspace 6
+assign [app_id="Eclipse"] workspace 6
+
+# ==============================================================================
+# 6. APPLICATION WINDOW WINDOW RULES & BEHAVIORS
+# ==============================================================================
+# Firefox specific layouts
+workspace 3 layout toggle split
+
+# Zathura PDF reader rules
+for_window [app_id="(?i)zathura"] fullscreen enable
+
+# Eclipse developer layout rules
+for_window [class="(?i)eclipse" app_id="(?i)eclipse"] fullscreen enable
+
+# Anki rules: Force main app and all sub-windows to tile and open fullscreen
+for_window [app_id="anki"] fullscreen disable, floating disable
+for_window [class="(?i)anki"] fullscreen disable, floating disable
+for_window [app_id="net.ankiweb.Anki"] fullscreen disable, floating disable
+for_window [app_id="net.ankiweb.Anki" title="(?i)add"] floating disable, fullscreen enable
+for_window [app_id="net.ankiweb.Anki" title="(?i)browse"] floating disable, fullscreen enable
+for_window [app_id="net.ankiweb.Anki" title="(?i)stats"] floating disable, fullscreen enable
+
+# ==============================================================================
+# 7. HARDWARE CONTROLS (VOLUME & BRIGHTNESS)
+# ==============================================================================
+bindsym --locked XF86AudioLowerVolume exec amixer set Master 5%- unmute, exec amixer set Speaker unmute 2>/dev/null, exec amixer set Headphone unmute 2>/dev/null
+bindsym --locked XF86AudioRaiseVolume exec amixer set Master 5%+ unmute, exec amixer set Speaker unmute 2>/dev/null, exec amixer set Headphone unmute 2>/dev/null
+bindsym --locked XF86AudioMute        exec amixer set Master toggle, exec amixer set Speaker toggle 2>/dev/null, exec amixer set Headphone toggle 2>/dev/null
+bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym --locked XF86MonBrightnessUp   exec brightnessctl set +5%
+
+# ==============================================================================
+# 8. AUDIO & APPLICATION AUTOMATED BOOT SEQUENCE
+# ==============================================================================
+exec amixer set Master unmute
+exec amixer set Speaker unmute 100% 2>/dev/null
+exec amixer set Headphone unmute 100% 2>/dev/null
+exec amixer set PCM unmute 100% 2>/dev/null
+exec kitty
+exec kitty --app-id yazi -e yazi
+exec firefox
+exec flatpak run net.ankiweb.Anki
+exec bash -c 'sleep 1 && for f in ~/Downloads/The*; do [ -f "$f" ] && zathura "$f" & break; done'
+
+# Landing focus point at system startup
+workspace 1
+
+# ==============================================================================
+# 9. SYSTEM RECORDING & GIF ENGINE PIPELINES
+# ==============================================================================
+bindsym $mod+Shift+g exec ~/.local/bin/sway-gif-encode.sh
+bindsym $mod+Escape exec pkill -SIGINT wf-recorder
+
+# ==============================================================================
+# 10. SYSTEM STATUS BAR INTERFACE
+# ==============================================================================
+bar {
+    position top
+    status_command ~/.config/sway/status.sh
+    font pango:monospace 10
+    mode hide
+    hidden_state hide
+    modifier Mod4
+    
+    colors {
+        statusline #f2e7c9
+        background #1a1a1a
+        inactive_workspace #1a1a1a #1a1a1a #888888
+        focused_workspace  #f2e7c9 #1a1a1a #f2e7c9
+    }
+}
+

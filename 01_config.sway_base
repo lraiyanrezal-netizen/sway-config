@@ -1,0 +1,71 @@
+# ==============================================================================
+# ARCH SWAY: COMPREHENSIVE AUTOMATED ENVIRONMENT
+# ==============================================================================
+
+# Core Modifier Key (Super / Windows Key)
+set $mod Mod4
+
+# Distraction-Free Visual Styles
+font pango:DejaVu Sans Mono 10
+floating_modifier $mod normal
+default_border pixel 2
+default_floating_border normal 2
+hide_edge_borders none
+
+# Hardware Input/Output Profiles
+output * bg #1a1a1a solid_color
+
+# Core System Utilities & Tools
+bindsym $mod+Return exec kitty
+bindsym $mod+Shift+Return exec kitty --app-id kitty-local
+bindsym $mod+f exec firefox
+bindsym Print exec grim -g "$(slurp)" - | wl-copy --type image/png
+
+# Configuration Controls
+bindsym $mod+Shift+q kill
+bindsym $mod+Shift+c reload
+
+# Workspace Navigation Bindings (Super + 1-5)
+bindsym $mod+1 workspace 1
+bindsym $mod+2 workspace 2
+bindsym $mod+3 workspace 3
+bindsym $mod+4 workspace 4
+bindsym $mod+5 workspace 5
+
+# Move Active Windows to Workspaces (Super + Shift + 1-5)
+bindsym $mod+Shift+1 move container to workspace 1
+bindsym $mod+Shift+2 move container to workspace 2
+bindsym $mod+Shift+3 move container to workspace 3
+bindsym $mod+Shift+4 move container to workspace 4
+bindsym $mod+Shift+5 move container to workspace 5
+
+# Window-to-Workspace Permanent Routing Rules
+assign [app_id="kitty"] workspace 1
+assign [app_id="yazi"] workspace 2
+assign [app_id="firefox"] workspace 3
+assign [app_id="anki"] workspace 4
+assign [class="(?i)anki"] workspace 4
+assign [app_id="zathura"] workspace 5
+
+# Application Layer Behavior Overrides
+for_window [app_id="zathura"] fullscreen enable
+
+# Automated Login Launch Sequence
+exec kitty
+exec kitty --app-id yazi -e yazi
+exec firefox
+exec bash -c 'sleep 1 && QT_QPA_PLATFORM=wayland ANKI_WAYLAND=1 anki'
+exec bash -c 'sleep 1 && zathura ~/Downloads/The*'
+
+# Fallback Target View Initializer
+workspace 1
+
+# Anki Layout and Window Handling
+for_window [app_id="anki"] fullscreen disable
+for_window [app_id="anki"] floating disable
+for_window [class="(?i)anki"] fullscreen disable
+for_window [class="(?i)anki"] floating disable
+for_window [app_id="anki" title="(?i)add"] floating enable
+for_window [app_id="anki" title="(?i)browse"] floating enable
+for_window [class="(?i)anki" title="(?i)add"] floating enable
+for_window [class="(?i)anki" title="(?i)browse"] floating enable
