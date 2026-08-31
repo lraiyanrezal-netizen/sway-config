@@ -51,7 +51,7 @@ bindsym $mod+Shift+4 move container to workspace 4
 bindsym $mod+Shift+5 move container to workspace 5
 bindsym $mod+Shift+6 move container to workspace 6
 
-# Tab/Bracket window focus navigation adjustments
+# Tab/Bracket window focus navigation adjustments (Cycles tabs cleanly)
 bindsym $mod+bracketright focus right
 bindsym $mod+bracketleft focus left
 bindsym $mod+Tab focus right or surface
@@ -82,13 +82,15 @@ for_window [app_id="(?i)zathura"] fullscreen enable
 # Eclipse developer layout rules
 for_window [class="(?i)eclipse" app_id="(?i)eclipse"] fullscreen enable
 
-# Anki rules: Force main app and all sub-windows to tile and open fullscreen
-for_window [app_id="anki"] fullscreen disable, floating disable
-for_window [class="(?i)anki"] fullscreen disable, floating disable
-for_window [app_id="net.ankiweb.Anki"] fullscreen disable, floating disable
-for_window [app_id="net.ankiweb.Anki" title="(?i)add"] floating disable, fullscreen enable
-for_window [app_id="net.ankiweb.Anki" title="(?i)browse"] floating disable, fullscreen enable
-for_window [app_id="net.ankiweb.Anki" title="(?i)stats"] floating disable, fullscreen enable
+# Anki rules: Force the container layout to "tabbed" the moment any Anki window opens
+for_window [app_id="net.ankiweb.Anki"] layout tabbed, fullscreen disable, floating disable, border pixel 0
+for_window [app_id="anki"] layout tabbed, fullscreen disable, floating disable, border pixel 0
+for_window [class="(?i)anki"] layout tabbed, fullscreen disable, floating disable, border pixel 0
+
+# Ensure all sub-menus also drop borders and obey the tabbed layout structure
+for_window [app_id="net.ankiweb.Anki" title="(?i)add"] fullscreen disable, floating disable, border pixel 0
+for_window [app_id="net.ankiweb.Anki" title="(?i)browse"] fullscreen disable, floating disable, border pixel 0
+for_window [app_id="net.ankiweb.Anki" title="(?i)stats"] fullscreen disable, floating disable, border pixel 0
 
 # ==============================================================================
 # 7. HARDWARE CONTROLS (VOLUME & BRIGHTNESS)
