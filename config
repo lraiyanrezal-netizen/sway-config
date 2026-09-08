@@ -119,8 +119,11 @@ bindsym --locked XF86AudioMute        exec pactl set-sink-mute @DEFAULT_SINK@ to
 bindsym $mod+F2 exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 bindsym $mod+F3 exec pactl set-sink-volume @DEFAULT_SINK@ +5%
 
+# Brightness Rocker Mapping (Standard Keys + Mod Key Modifiers)
 bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
 bindsym --locked XF86MonBrightnessUp   exec brightnessctl set +5%
+bindsym $mod+F4                        exec brightnessctl set 5%-
+bindsym $mod+F5                        exec brightnessctl set +5%
 
 # ==============================================================================
 # 8. AUDIO & APPLICATION AUTOMATED BOOT SEQUENCE
