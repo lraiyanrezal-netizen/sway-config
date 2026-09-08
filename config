@@ -110,19 +110,22 @@ for_window [app_id="net.ankiweb.Anki" title="(?i)stats"] fullscreen disable, flo
 # ==============================================================================
 # 7. HARDWARE CONTROLS (VOLUME & BRIGHTNESS)
 # ==============================================================================
-bindsym --locked XF86AudioLowerVolume exec amixer set Master 5%- unmute, exec amixer set Speaker unmute 2>/dev/null, exec amixer set Headphone unmute 2>/dev/null
-bindsym --locked XF86AudioRaiseVolume exec amixer set Master 5%+ unmute, exec amixer set Speaker unmute 2>/dev/null, exec amixer set Headphone unmute 2>/dev/null
-bindsym --locked XF86AudioMute        exec amixer set Master toggle, exec amixer set Speaker toggle 2>/dev/null, exec amixer set Headphone toggle 2>/dev/null
+# Standard Multimedia Key Support
+bindsym --locked XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym --locked XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym --locked XF86AudioMute        exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+
+# Direct Fallback mappings using Mod (Windows Key) + F2/F3 keys
+bindsym $mod+F2 exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym $mod+F3 exec pactl set-sink-volume @DEFAULT_SINK@ +5%
+
 bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
 bindsym --locked XF86MonBrightnessUp   exec brightnessctl set +5%
 
 # ==============================================================================
 # 8. AUDIO & APPLICATION AUTOMATED BOOT SEQUENCE
 # ==============================================================================
-exec amixer set Master unmute
-exec amixer set Speaker unmute 100% 2>/dev/null
-exec amixer set Headphone unmute 100% 2>/dev/null
-exec amixer set PCM unmute 100% 2>/dev/null
+exec pactl set-sink-mute @DEFAULT_SINK@ 0
 exec kitty
 exec kitty --app-id yazi -e yazi
 exec firefox
