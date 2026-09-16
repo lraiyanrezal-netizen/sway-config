@@ -36,22 +36,26 @@ bindsym $mod+o exec libreoffice
 # ==============================================================================
 # 4. WORKSPACE NAVIGATION & ROUTING KEYS
 # ==============================================================================
-# Jump to workspaces 1-6 & 10
+# Jump to workspaces 1-6, 9 & 10
 bindsym $mod+1 workspace 1
 bindsym $mod+2 workspace 2
 bindsym $mod+3 workspace 3
 bindsym $mod+4 workspace 4
-bindsym $mod+5 workspace 5
 bindsym $mod+6 workspace 6
+bindsym $mod+9 workspace 9
 bindsym $mod+0 workspace 10
 
-# Move containers to workspaces 1-6 & 10
+# Dynamic Workspace 5: Switch to 5. If completely empty, execute Eclipse. 
+bindsym $mod+5 exec swaymsg workspace 5; if [ -z "$(swaymsg -t get_tree | jq '.. | select(.type? == "workspace" and .name? == "5") | .nodes, .floating_nodes' | grep -v '\[\]')" ]; then _JAVA_AWT_WM_NONREPARENTING=1 eclipse & fi
+
+# Move containers to workspaces 1-6, 9 & 10
 bindsym $mod+Shift+1 move container to workspace 1
 bindsym $mod+Shift+2 move container to workspace 2
 bindsym $mod+Shift+3 move container to workspace 3
 bindsym $mod+Shift+4 move container to workspace 4
 bindsym $mod+Shift+5 move container to workspace 5
 bindsym $mod+Shift+6 move container to workspace 6
+bindsym $mod+Shift+9 move container to workspace 9
 bindsym $mod+Shift+0 move container to workspace 10
 
 # Tab/Bracket window focus navigation adjustments (Cycles tabs cleanly)
@@ -69,9 +73,7 @@ assign [app_id="firefox"] workspace 3
 assign [app_id="anki"] workspace 4
 assign [class="(?i)anki"] workspace 4
 assign [app_id="net.ankiweb.Anki"] workspace 4
-assign [app_id="(?i)zathura"] workspace 5
-assign [class="Eclipse"] workspace 6
-assign [app_id="Eclipse"] workspace 6
+assign [app_id="(?i)zathura"] workspace 9
 
 # Total catch-all matching rule overrides for any type of LibreOffice windows
 assign [app_id="(?i).*libreoffice.*"] workspace 10
