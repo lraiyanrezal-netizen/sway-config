@@ -1,42 +1,46 @@
-# ==============================================================================
-# 1. SYSTEM INITIALIZATION & ENVIRONMENT
-# ==============================================================================
+set $mod Mod4
+font pango:DejaVu Sans Mono 10
+
 # Sync desktop variables with systemd/D-Bus to ensure smooth application boot
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 
-# ==============================================================================
-# 2. CORE VISUAL STYLES & INTERFACE
-# ==============================================================================
-set $mod Mod4
-font pango:DejaVu Sans Mono 10
+# Core Visual Styles & Interface
 floating_modifier $mod normal
 default_border pixel 2
 default_floating_border normal 2
 hide_edge_borders none
 output * bg #1a1a1a solid_color
 
-# ==============================================================================
-# 3. CORE KEYBINDINGS & CORE UTILITIES
-# ==============================================================================
+# Default Window Behavior (Almost Full Screen Tab Layout)
+workspace_layout tabbed
+
+# Primary App Launchers
 bindsym $mod+Return exec kitty
 bindsym $mod+Shift+Return exec kitty --app-id kitty-local
 bindsym $mod+f exec firefox
-bindsym $mod+Shift+q kill
-bindsym $mod+Shift+c reload
-
-# Screenshot tool (Print Screen -> copies region to clipboard)
-bindsym Print exec grim -g "$(slurp)" - | wl-copy --type image/png
-
-# Manual application launchers
-bindsym $mod+Shift+a exec flatpak run net.ankiweb.Anki
-bindsym $mod+e exec _JAVA_AWT_WM_NONREPARENTING=1 eclipse
+bindsym $mod+y exec kitty --class yazi_explorer -e yazi
 bindsym $mod+o exec libreoffice
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+q kill
 
-# ==============================================================================
-# 4. WORKSPACE NAVIGATION & ROUTING KEYS
-# ==============================================================================
-# Jump to workspaces 1-6, 9 & 10
+# Screenshot & Screencast GIF Tools
+bindsym Print exec grim -g "$(slurp)" - | wl-copy --type image/png
+bindsym $mod+Shift+g exec bash ~/scripts/capture-gif.sh
+
+# Hardware Media & Audio Controls
+bindsym $mod+F1 exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym $mod+F2 exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym $mod+F3 exec pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym --locked XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym --locked XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym --locked XF86AudioMute        exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+
+# Hardware Screen Brightness Controls
+bindsym $mod+F4 exec brightnessctl set 5%-
+bindsym $mod+F5 exec brightnessctl set +5%
+
+# Workspace Nav Maps (Workspace 5 is Handled Directly via the Eclipse Binding Below)
 bindsym $mod+1 workspace 1
 bindsym $mod+2 workspace 2
 bindsym $mod+3 workspace 3
@@ -45,10 +49,9 @@ bindsym $mod+6 workspace 6
 bindsym $mod+9 workspace 9
 bindsym $mod+0 workspace 10
 
-# Dynamic Workspace 5: Switch to 5. If completely empty, execute Eclipse. 
-bindsym $mod+5 exec swaymsg workspace 5; if [ -z "$(swaymsg -t get_tree | jq '.. | select(.type? == "workspace" and .name? == "5") | .nodes, .floating_nodes' | grep -v '\[\]')" ]; then _JAVA_AWT_WM_NONREPARENTING=1 eclipse & fi
+# Simplified Quick-Launch for Eclipse on Workspace 5 (Navigates & Launches Instantly)
+bindsym $mod+5 workspace 5; exec _JAVA_AWT_WM_NONREPARENTING=1 eclipse
 
-# Move containers to workspaces 1-6, 9 & 10
 bindsym $mod+Shift+1 move container to workspace 1
 bindsym $mod+Shift+2 move container to workspace 2
 bindsym $mod+Shift+3 move container to workspace 3
@@ -59,105 +62,49 @@ bindsym $mod+Shift+9 move container to workspace 9
 bindsym $mod+Shift+0 move container to workspace 10
 
 # Tab/Bracket window focus navigation adjustments (Cycles tabs cleanly)
-bindsym $mod+bracketright focus right
 bindsym $mod+bracketleft focus left
+bindsym $mod+bracketright focus right
 bindsym $mod+Tab focus right or surface
 bindsym $mod+Shift+Tab focus left or surface
 
-# ==============================================================================
-# 5. PERMANENT WINDOW-TO-WORKSPACE ROUTING
-# ==============================================================================
+# Window Target Rules
 assign [app_id="kitty"] workspace 1
 assign [app_id="yazi"] workspace 2
 assign [app_id="firefox"] workspace 3
-assign [app_id="anki"] workspace 4
-assign [class="(?i)anki"] workspace 4
 assign [app_id="net.ankiweb.Anki"] workspace 4
-assign [app_id="(?i)zathura"] workspace 9
+assign [class="(?i)eclipse"] workspace 5
 
-# Total catch-all matching rule overrides for any type of LibreOffice windows
+assign [app_id="org.pwmt.zathura"] workspace 9
+assign [class="(?i)zathura"] workspace 9
+for_window [app_id="org.pwmt.zathura"] move to workspace 9; focus
+for_window [class="(?i)zathura"] move to workspace 9; focus
+for_window [app_id="org.pwmt.zathura"] fullscreen enable
+
 assign [app_id="(?i).*libreoffice.*"] workspace 10
 assign [class="(?i).*libreoffice.*"] workspace 10
 assign [app_id="(?i).*soffice.*"] workspace 10
 assign [class="(?i).*soffice.*"] workspace 10
+for_window [app_id="(?i).*libreoffice.*"] move to workspace 10; focus
+for_window [class="(?i).*libreoffice.*"] move to workspace 10; focus
 
-# ==============================================================================
-# 6. APPLICATION WINDOW WINDOW RULES & BEHAVIORS
-# ==============================================================================
-# Instantly force view/focus migration over to workspace 10 upon startup
-for_window [app_id="(?i).*libreoffice.*"] workspace 10
-for_window [class="(?i).*libreoffice.*"] workspace 10
-for_window [app_id="(?i).*soffice.*"] workspace 10
-for_window [class="(?i).*soffice.*"] workspace 10
-
-# Firefox specific layouts
-workspace 3 layout toggle split
-
-# Zathura PDF reader rules
-for_window [app_id="(?i)zathura"] fullscreen enable
-
-# Eclipse developer layout rules
-for_window [class="(?i)eclipse" app_id="(?i)eclipse"] fullscreen enable
-
-# Anki rules: Force the container layout to "tabbed" the moment any Anki window opens
+# Anki Layout Tuning For Submenus
 for_window [app_id="net.ankiweb.Anki"] layout tabbed, fullscreen disable, floating disable, border pixel 0
-for_window [app_id="anki"] layout tabbed, fullscreen disable, floating disable, border pixel 0
-for_window [class="(?i)anki"] layout tabbed, fullscreen disable, floating disable, border pixel 0
-
-# Ensure all sub-menus also drop borders and obey the tabbed layout structure
 for_window [app_id="net.ankiweb.Anki" title="(?i)add"] fullscreen disable, floating disable, border pixel 0
 for_window [app_id="net.ankiweb.Anki" title="(?i)browse"] fullscreen disable, floating disable, border pixel 0
 for_window [app_id="net.ankiweb.Anki" title="(?i)stats"] fullscreen disable, floating disable, border pixel 0
 
-# ==============================================================================
-# 7. HARDWARE CONTROLS (VOLUME & BRIGHTNESS)
-# ==============================================================================
-# Standard Multimedia Key Support
-bindsym --locked XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
-bindsym --locked XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
-bindsym --locked XF86AudioMute        exec pactl set-sink-mute @DEFAULT_SINK@ toggle
-
-# Direct Fallback mappings using Mod (Windows Key) + F1/F2/F3 keys
-bindsym $mod+F1 exec pactl set-sink-mute @DEFAULT_SINK@ toggle
-bindsym $mod+F2 exec pactl set-sink-volume @DEFAULT_SINK@ -5%
-bindsym $mod+F3 exec pactl set-sink-volume @DEFAULT_SINK@ +5%
-
-# Brightness Rocker Mapping (Standard Keys + Mod Key Modifiers)
-bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
-bindsym --locked XF86MonBrightnessUp   exec brightnessctl set +5%
-bindsym $mod+F4                        exec brightnessctl set 5%-
-bindsym $mod+F5                        exec brightnessctl set +5%
-
-# ==============================================================================
-# 8. AUDIO & APPLICATION AUTOMATED BOOT SEQUENCE
-# ==============================================================================
-exec pactl set-sink-mute @DEFAULT_SINK@ 0
+# Automated Cold Boot Seq
 exec kitty
-exec kitty --app-id yazi -e yazi
+exec kitty --class yazi -e yazi
 exec firefox
 exec flatpak run net.ankiweb.Anki
-exec bash -c 'sleep 1 && for f in ~/Downloads/The*; do [ -f "$f" ] && zathura "$f" & break; done'
-
-# Landing focus point at system startup
 workspace 1
 
-# ==============================================================================
-# 9. SYSTEM RECORDING & GIF ENGINE PIPELINES
-# ==============================================================================
-bindsym $mod+Shift+g exec ~/.local/bin/sway-gif-encode.sh
-bindsym $mod+Escape exec pkill -SIGINT wf-recorder
-
-# ==============================================================================
-# 10. SYSTEM STATUS BAR INTERFACE
-# ==============================================================================
+# System Status Bar
 bar {
     position top
     status_command ~/.config/sway/status.sh
     font pango:monospace 10
-    mode hide
-    hidden_state hide
-    modifier Mod4
-    
     colors {
         statusline #f2e7c9
         background #1a1a1a
