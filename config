@@ -15,18 +15,19 @@ output * bg #1a1a1a solid_color
 # Default Window Behavior (Almost Full Screen Tab Layout)
 workspace_layout tabbed
 
-# Primary App Launchers
+# Primary App Launchers (Consistent $mod key mappings)
 bindsym $mod+Return exec kitty
 bindsym $mod+Shift+Return exec kitty --app-id kitty-local
 bindsym $mod+f exec firefox
-bindsym $mod+y exec kitty --class yazi_explorer -e yazi
+bindsym $mod+y exec kitty --app-id yazi -e yazi
+bindsym $mod+a exec flatpak run net.ankiweb.Anki
 bindsym $mod+o exec libreoffice
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+q kill
 
 # Screenshot & Screencast GIF Tools
 bindsym Print exec grim -g "$(slurp)" - | wl-copy --type image/png
-bindsym $mod+Shift+g exec bash ~/scripts/capture-gif.sh
+bindsym $mod+Shift+g exec bash /home/raiyan/Downloads/02_Areas/sway-gif-encode.sh
 
 # Hardware Media & Audio Controls
 bindsym $mod+F1 exec pactl set-sink-mute @DEFAULT_SINK@ toggle
@@ -95,7 +96,7 @@ for_window [app_id="net.ankiweb.Anki" title="(?i)stats"] fullscreen disable, flo
 
 # Automated Cold Boot Seq
 exec kitty
-exec kitty --class yazi -e yazi
+exec kitty --app-id yazi -e yazi
 exec firefox
 exec flatpak run net.ankiweb.Anki
 workspace 1
