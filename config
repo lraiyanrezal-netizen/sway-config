@@ -1,6 +1,18 @@
 set $mod Mod4
 font pango:DejaVu Sans Mono 10
 
+# Keep this clean - keyd handles the spacebar externally now
+input "type:keyboard" {
+}
+
+set $mod Mod4
+font pango:DejaVu Sans Mono 10
+
+# 1. Map Right Alt key to act as an additional Super key (Mod4)
+input "type:keyboard" {
+    xkb_options altwin:meta_win
+}
+
 # Sync desktop variables with systemd/D-Bus to ensure smooth application boot
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
@@ -23,7 +35,9 @@ bindsym $mod+y exec kitty --app-id yazi -e yazi
 bindsym $mod+a exec flatpak run net.ankiweb.Anki
 bindsym $mod+o exec libreoffice
 bindsym $mod+Shift+c reload
-bindsym $mod+Shift+q kill
+
+# Smart Kill: Closes normal apps forcefully, but tells Eclipse to shut down cleanly
+bindsym $mod+Shift+q [class="(?i)eclipse"] exec sh -c "rm -f /home/raiyan/eclipse-workspace/.metadata/.lock && swaymsg kill"; kill
 
 # Screenshot & Screencast GIF Tools
 bindsym Print exec grim -g "$(slurp)" - | wl-copy --type image/png
@@ -41,17 +55,18 @@ bindsym --locked XF86AudioMute        exec pactl set-sink-mute @DEFAULT_SINK@ to
 bindsym $mod+F4 exec brightnessctl set 5%-
 bindsym $mod+F5 exec brightnessctl set +5%
 
-# Workspace Nav Maps (Workspace 5 is Handled Directly via the Eclipse Binding Below)
+# Workspace Nav Maps (Workspace 5 is Handled Safely Directly via the Separated Bindings Below)
 bindsym $mod+1 workspace 1
 bindsym $mod+2 workspace 2
 bindsym $mod+3 workspace 3
 bindsym $mod+4 workspace 4
+bindsym $mod+5 workspace 5
 bindsym $mod+6 workspace 6
 bindsym $mod+9 workspace 9
 bindsym $mod+0 workspace 10
 
-# Simplified Quick-Launch for Eclipse on Workspace 5 (Navigates & Launches Instantly)
-bindsym $mod+5 workspace 5; exec _JAVA_AWT_WM_NONREPARENTING=1 eclipse
+# Fixed Launch Keybinding (Wrapped safely in a subshell execution shell string)
+bindsym $mod+e exec sh -c "rm -f /home/raiyan/eclipse-workspace/.metadata/.lock && _JAVA_AWT_WM_NONREPARENTING=1 eclipse"
 
 bindsym $mod+Shift+1 move container to workspace 1
 bindsym $mod+Shift+2 move container to workspace 2
@@ -62,9 +77,9 @@ bindsym $mod+Shift+6 move container to workspace 6
 bindsym $mod+Shift+9 move container to workspace 9
 bindsym $mod+Shift+0 move container to workspace 10
 
-# Tab/Bracket window focus navigation adjustments (Cycles tabs cleanly)
-bindsym $mod+bracketleft focus left
-bindsym $mod+bracketright focus right
+# Tab/Bracket window focus navigation adjustments (Cycles matching apps cleanly)
+bindsym $mod+bracketleft [app_id="org.pwmt.zathura"] focus prev; [class="(?i)zathura"] focus prev
+bindsym $mod+bracketright [app_id="org.pwmt.zathura"] focus next; [class="(?i)zathura"] focus next
 bindsym $mod+Tab focus right or surface
 bindsym $mod+Shift+Tab focus left or surface
 
@@ -113,3 +128,11 @@ bar {
         focused_workspace  #f2e7c9 #1a1a1a #f2e7c9
     }
 }
+
+# Force any Zathura instance to route and open on Workspace 9 automatically
+assign [app_id="zathura"] 9
+for_window [app_id="zathura"] focus
+
+# Launch Thunar with Super+T without conflict warnings
+bindsym --release $mod+t exec thunar
+
