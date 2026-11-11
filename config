@@ -1,16 +1,10 @@
 set $mod Mod4
 font pango:DejaVu Sans Mono 10
 
-# Keep this clean - keyd handles the spacebar externally now
-input "type:keyboard" {
-}
 
-set $mod Mod4
-font pango:DejaVu Sans Mono 10
-
-# 1. Map Right Alt key to act as an additional Super key (Mod4)
+# Prevent thumb strain: Left Alt is Super, and Caps Lock is ALSO Super!
 input "type:keyboard" {
-    xkb_options altwin:meta_win
+    xkb_options altwin:swap_lalt_lwin,caps:super
 }
 
 # Sync desktop variables with systemd/D-Bus to ensure smooth application boot
@@ -78,8 +72,9 @@ bindsym $mod+Shift+9 move container to workspace 9
 bindsym $mod+Shift+0 move container to workspace 10
 
 # Tab/Bracket window focus navigation adjustments (Cycles matching apps cleanly)
-bindsym $mod+bracketleft [app_id="org.pwmt.zathura"] focus prev; [class="(?i)zathura"] focus prev
-bindsym $mod+bracketright [app_id="org.pwmt.zathura"] focus next; [class="(?i)zathura"] focus next
+bindsym $mod+bracketleft focus prev
+bindsym $mod+bracketright focus next
+
 bindsym $mod+Tab focus right or surface
 bindsym $mod+Shift+Tab focus left or surface
 
@@ -135,4 +130,26 @@ for_window [app_id="zathura"] focus
 
 # Launch Thunar with Super+T without conflict warnings
 bindsym --release $mod+t exec thunar
+
+# --- BALANCED SEQUENTIAL HOME-ROW WORKSPACE NAVIGATION ---
+# Tap Windows Key + Spacebar to enter the workspace mode gateway
+bindsym $mod+space mode "workspace"
+
+mode "workspace" {
+    # Left hand home row keys switch to workspaces 1-5 without leaving ASDF
+    bindsym a workspace 1; mode "default"
+    bindsym s workspace 2; mode "default"
+    bindsym d workspace 3; mode "default"
+    bindsym f workspace 4; mode "default"
+    bindsym g workspace 5; mode "default"
+    
+    # Right hand keys mapped to remaining active workspaces
+    bindsym h workspace 6; mode "default"
+    bindsym j workspace 9; mode "default"
+    bindsym k workspace 10; mode "default"
+
+    # Press Escape or Return to cancel out of the mode safely
+    bindsym Escape mode "default"
+    bindsym Return mode "default"
+}
 
