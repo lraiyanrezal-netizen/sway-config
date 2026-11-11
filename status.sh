@@ -10,8 +10,8 @@ while true; do
     # Get Brightness Percentage from brightnessctl
     BRIGHT=$(brightnessctl -m | awk -F, '{print int(($4/$3)*100)"%"}')
 
-    # Output to Sway Bar
-    echo "🔊 Vol: $VOL | ☀️ Bright: $BRIGHT | 🗓️ $(date +'%Y-%m-%d %l:%M:%S %p')"
+    # Output to Sway Bar (Clean text version without emojis)
+    echo "Vol: $VOL | Bright: $BRIGHT | $(date +'%Y-%m-%d %l:%M:%S %p')"
     
     sleep 1
 done
